@@ -6,7 +6,7 @@ const { callOracle } = require("./callContract");
 
 const provider = new starknet.RpcProvider({
   nodeUrl:
-    "https://starknet-mainnet.g.alchemy.com/v2/MMC_IgNUW2z5_iIEYa1PhiNBD_WKOdpo",
+    "https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_7/7IxMoOR0xzIw6p6PLdshnqIiLl6ZCjcC",
 });
 
 async function getEventsFromChain(tokenAddress) {
@@ -151,6 +151,7 @@ async function debugTransactions(req, res) {
   const token0keys = transfers[0];
   const token1keys = transfers[1];
 
+  console.log("Debug Token0Keys =", token0keys);
   const token0 = token0keys.from_address;
   const token1 = token1keys.from_address;
 
@@ -181,8 +182,13 @@ async function getTokens(obj, tokenAddress) {
   const amount0 = obj.token0Obj.amount;
   const amount1 = obj.token1Obj.amount;
 
+  console.log("Amount0 =", amount0);
+  console.log("Amount1 =", amount1);
+
   const token0Data = await testABI(token0);
   const token1Data = await testABI(token1);
+
+  const givenToken = await testABI(tokenAddress);
 
   const parsedAmount0 = ethers.formatUnits(
     amount0.toString(),
@@ -228,9 +234,20 @@ async function getTokens(obj, tokenAddress) {
 
   const honepotStatus = await honeyPotCheck(tax);
   console.log("totalTokens =", totalTokens);
+  console.log("Token0Name", token0Data.tokenName);
+  console.log("Token1Name", token1Data.tokenName);
+  console.log("token0", token0);
+  console.log("TokenAddress", tokenAddress);
+
+  let testToken;
+  if (token0 === tokenAddress) {
+    testToken = token1Data.tokenName;
+  } else {
+    testToken = token0Data.tokenName;
+  }
   return {
-    token0: token0Data.tokenName,
-    token1: token1Data.tokenName,
+    tokenName: givenToken.tokenName,
+    testToken: testToken,
     tax,
     isHoneyPot: honepotStatus,
     tokenAddress: tokenAddress,
